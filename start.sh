@@ -38,7 +38,7 @@ if [ "$1" == "backup" ]; then
     for db in $databases; do
         echo "dumping $db"
 
-        pg_dump --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "$LOCAL_DIR/$db.gz"
+        pg_dump -v --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "$LOCAL_DIR/$db.gz"
 
         if [ $? == 0 ]; then
             yes | /usr/local/bin/az storage blob upload -f $LOCAL_DIR/$db.gz -n $db_$(date -d "today" +"%Y_%m_%d_%H_%M").gz -c $AZURE_STORAGE_CONTAINER --connection-string "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
@@ -69,7 +69,7 @@ elif [ "$1" == "restore" ]; then
 
         if [ $? == 0 ]; then
             echo "...restoring"
-            db=`basename --suffix=.gz $archive`
+            db=$(cut -d'_' -f1 <<< $arquive)
 
             psql --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER -d $db -c "drop schema public cascade; create schema public;"
 
