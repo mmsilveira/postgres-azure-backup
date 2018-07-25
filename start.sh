@@ -41,7 +41,7 @@ if [ "$1" == "backup" ]; then
         pg_dump --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "$LOCAL_DIR/$db.gz"
 
         if [ $? == 0 ]; then
-            yes | /usr/local/bin/az storage blob upload -f $LOCAL_DIR/$db.gz -n $db.gz -c $AZURE_STORAGE_CONTAINER --connection-string "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
+            yes | /usr/local/bin/az storage blob upload -f $LOCAL_DIR/$db.gz -n $db_$(date -d "today" +"%Y_%m_%d_%H_%M").gz -c $AZURE_STORAGE_CONTAINER --connection-string "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
 
             if [ $? == 0 ]; then
                 rm $LOCAL_DIR/$db.gz
