@@ -69,7 +69,7 @@ elif [ "$1" == "restore" ]; then
 
         if [ $? == 0 ]; then
             echo "...restoring"
-            db=$(cut -d'_' -f1 <<< $arquive)
+            db=$(cut -d'_' -f1 <<< $archive)
 
             psql --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER -d $db -c "drop schema public cascade; create schema public;"
 
