@@ -41,7 +41,7 @@ if [ "$1" == "backup" ]; then
         pg_dump -v --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "$LOCAL_DIR/$db.gz"
 
         if [ $? == 0 ]; then
-            yes | /usr/local/bin/az storage blob upload -f $LOCAL_DIR/$db.gz -n $db_$(date -d "today" +"%Y_%m_%d_%H_%M").gz -c $AZURE_STORAGE_CONTAINER --connection-string "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
+            yes | az storage blob upload -f $LOCAL_DIR/$db.gz -n $db_$(date -d "today" +"%Y_%m_%d_%H_%M").gz -c $AZURE_STORAGE_CONTAINER --connection-string "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
 
             if [ $? == 0 ]; then
                 rm $LOCAL_DIR/$db.gz
@@ -56,7 +56,7 @@ elif [ "$1" == "restore" ]; then
     if [ -n "$2" ]; then
         archives=$2.gz
     else
-        archives=`/usr/local/bin/az storage blob list --account-name $AZURE_STORAGE_ACCOUNT --account-key "$AZURE_STORAGE_ACCESS_KEY" -c $AZURE_STORAGE_CONTAINER | grep ".gz" | awk '{print $2}'`
+        archives=`az storage blob list --account-name $AZURE_STORAGE_ACCOUNT --account-key "$AZURE_STORAGE_ACCESS_KEY" -c $AZURE_STORAGE_CONTAINER | grep ".gz" | awk '{print $2}'`
     fi
 
     for archive in $archives; do
@@ -65,7 +65,7 @@ elif [ "$1" == "restore" ]; then
         echo "restoring $archive"
         echo "...transferring"
 
-        yes | /usr/local/bin/az storage blob download  --account-name $AZURE_STORAGE_ACCOUNT --account-key "$AZURE_STORAGE_ACCESS_KEY" -c $AZURE_STORAGE_CONTAINER -f $tmp  -n $archive 
+        yes | az storage blob download  --account-name $AZURE_STORAGE_ACCOUNT --account-key "$AZURE_STORAGE_ACCESS_KEY" -c $AZURE_STORAGE_CONTAINER -f $tmp  -n $archive 
 
         if [ $? == 0 ]; then
             echo "...restoring"
