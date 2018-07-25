@@ -24,6 +24,10 @@ if [ -n $POSTGRES_PASSWORD ]; then
     export PGPASSWORD=$POSTGRES_PASSWORD
 fi
 
+if [[ "${LOCAL_DIR}" = "" ]]; then
+    $LOCAL_DIR="/tmp"
+fi
+
 if [ "$1" == "backup" ]; then
     if [ -n "$2" ]; then
         databases=$2
@@ -34,13 +38,13 @@ if [ "$1" == "backup" ]; then
     for db in $databases; do
         echo "dumping $db"
 
-        pg_dump --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "/tmp/$db.gz"
+        pg_dump --host=$POSTGRES_HOST --port=$POSTGRES_PORT --username=$POSTGRES_USER $db | gzip > "$LOCAL_DIR/$db.gz"
 
         if [ $? == 0 ]; then
-            yes | /usr/local/bin/azure storage blob upload /tmp/$db.gz $AZURE_STORAGE_CONTAINER -c "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
+            yes | /usr/local/bin/azure storage blob upload $LOCAL_DIR/$db.gz $AZURE_STORAGE_CONTAINER -c "DefaultEndpointsProtocol=https;BlobEndpoint=https://$AZURE_STORAGE_ACCOUNT.blob.core.windows.net/;AccountName=$AZURE_STORAGE_ACCOUNT;AccountKey=$AZURE_STORAGE_ACCESS_KEY"
 
             if [ $? == 0 ]; then
-                rm /tmp/$db.gz
+                rm $LOCAL_DIR/$db.gz
             else
                 >&2 echo "couldn't transfer $db.gz to Azure"
             fi
@@ -56,7 +60,7 @@ elif [ "$1" == "restore" ]; then
     fi
 
     for archive in $archives; do
-        tmp=/tmp/$archive
+        tmp=$LOCAL_DIR/$archive
 
         echo "restoring $archive"
         echo "...transferring"

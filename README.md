@@ -34,3 +34,4 @@ POSTGRES_HOST | `blank` | Address the Postgres server is accessible at
 POSTGRES_PORT | `blank` | Port the Postgres server is accessible on
 POSTGRES_USER | `blank` | User to connect as
 POSTGRES_PASSWORD | `blank` | Password to use when connecting
+LOCAL_DIR | `blank` | Local directory to save backup file
